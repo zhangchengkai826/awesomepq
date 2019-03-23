@@ -56,49 +56,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	var cols []ColInfo
 	var rs []Row
 
-	if tbname, ok := mux.Vars(r)["tbname"]; ok {
-		// Already log in.
-		// Already choose a table.
-		var (
-			colName string
-			colType string
-		)
-		connStr := fmt.Sprintf("dbname=%s user=andys sslmode=disable", dbname)
-		db, err := sql.Open("postgres", connStr)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer db.Close()
-
-		err = db.Ping()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// retrieve column info
-		rows, err := db.Query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1", tbname)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer rows.Close()
-		for rows.Next() {
-			err := rows.Scan(&colName, &colType)
-			if err != nil {
-				log.Fatal(err)
-			}
-			cols = append(cols, ColInfo{colName, colType})
-		}
-		err = rows.Err()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = tmplForm.Execute(w, TmplData{false, tableInfo, cols, rs})
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-		return
-	} else if r.Method != http.MethodPost {
+	if dbname == "" && r.Method != http.MethodPost {
 		// Not log in
 		err := tmplForm.Execute(w, TmplData{true, tableInfo, cols, rs})
 		if err != nil {
@@ -106,9 +64,11 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
 	// Already log in.
-	// Not choose a table.
-	dbname = r.FormValue("dbname")
+	if dbname == "" {
+		dbname = r.FormValue("dbname")
+	}
 	connStr := fmt.Sprintf("dbname=%s user=andys sslmode=disable", dbname)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -137,6 +97,54 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	err = rows.Err()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Already choose a table.
+	if tbname, ok := mux.Vars(r)["tbname"]; ok {
+		// retrieve cols
+		var (
+			colName string
+			colType string
+		)
+		rows, err := db.Query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1", tbname)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer rows.Close()
+		for rows.Next() {
+			err := rows.Scan(&colName, &colType)
+			if err != nil {
+				log.Fatal(err)
+			}
+			cols = append(cols, ColInfo{colName, colType})
+		}
+		err = rows.Err()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// retrieve data
+		rows, err = db.Query(fmt.Sprintf("SELECT * FROM %s", tbname))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer rows.Close()
+		for rows.Next() {
+			cellsRaw := make([]interface{}, len(cols))
+			cells := make([]Cell, len(cols))
+			for i := range cellsRaw {
+				cellsRaw[i] = &cells[i].Data
+			}
+			err := rows.Scan(cellsRaw...)
+			if err != nil {
+				log.Fatal(err)
+			}
+			rs = append(rs, Row{cells})
+		}
+		err = rows.Err()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	err = tmplForm.Execute(w, TmplData{false, tableInfo, cols, rs})

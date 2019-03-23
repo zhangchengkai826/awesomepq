@@ -1,0 +1,17 @@
+.tablePane {
+    width: 25%;
+    height: 100%;
+    background-color: plum;
+    left: 0;
+    position: fixed;
+    margin: 0;
+}
+
+.dataPane {
+    width: 75%;
+    height: 100%;
+    background-color: aquamarine;
+    right: 0;
+    position: fixed;
+    margin: 0;
+}

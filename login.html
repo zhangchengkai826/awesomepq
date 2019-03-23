@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AwesomePQ</title>
+    <link rel="stylesheet" href="/static/base.css" />
+</head>
+<body>
+
+{{if .NeedLogIn}}
+<h1>Connect to Database</h1>
+<form method="POST">
+    <label>Database:</label><br />
+    <input type="text" name="dbname"><br />
+    <input type="submit" value="Connect!">
+</form>
+{{else}}
+    <div class="tablePane">
+        <ul>
+            {{range .Tables}}
+                <li><a href="/tables/{{.Name}}">{{.Name}}</a></li>
+            {{end}}
+        </ul>
+    </div>
+    <div class="dataPane">
+        <table>
+            <tr>
+                {{range .Cols}}
+                    <th>{{.Name}}<br />{{.Type}}</th>
+                {{end}}
+            </tr>
+            {{range .Rows}}
+                <tr>
+                    {{range .Cells}}
+                        <td>{{.Data}}</td>
+                    {{end}}
+                </tr>
+            {{end}}
+        </table>
+    </div>
+{{end}}
+
+</body>
+</html>

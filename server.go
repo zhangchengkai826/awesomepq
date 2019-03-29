@@ -15,6 +15,7 @@ type TmplData struct {
 	Tables []TableInfo
 	Cols []ColInfo
 	Rows []Row
+	Outputs []interface{}
 }
 
 type TableInfo struct {
@@ -50,22 +51,23 @@ func main() {
 var dbname string
 
 func mainHandler(w http.ResponseWriter, r *http.Request) {
-	tmplForm := template.Must(template.ParseFiles("login.html"))
+	tmplForm := template.Must(template.ParseFiles("index.html"))
 
 	var tableInfo []TableInfo
 	var cols []ColInfo
 	var rs []Row
+	var outs []interface{}
 
 	if dbname == "" && r.Method != http.MethodPost {
-		// Not log in
-		err := tmplForm.Execute(w, TmplData{true, tableInfo, cols, rs})
+		// 1. Not log in
+		err := tmplForm.Execute(w, TmplData{true, tableInfo, cols, rs, outs})
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 		return
 	}
 
-	// Already log in.
+	// 2. Already log in.
 	if dbname == "" {
 		dbname = r.FormValue("dbname")
 	}
@@ -79,6 +81,15 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	err = db.Ping()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// @First deal with user command
+	if r.Method == http.MethodPost && r.FormValue("cmd") != "" {
+		cmd := r.FormValue("cmd")
+		_, err = db.Exec(cmd)
+		if err != nil {
+			outs = append(outs, err)
+		}
 	}
 
 	var name string
@@ -99,7 +110,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	// Already choose a table.
+	// 2.1 Already choose a table.
 	if tbname, ok := mux.Vars(r)["tbname"]; ok {
 		// retrieve cols
 		var (
@@ -120,10 +131,9 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		err = rows.Err()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal()
 		}
 
-		// retrieve data
 		rows, err = db.Query(fmt.Sprintf("SELECT * FROM %s", tbname))
 		if err != nil {
 			log.Fatal(err)
@@ -147,8 +157,8 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = tmplForm.Execute(w, TmplData{false, tableInfo, cols, rs})
+	err = tmplForm.Execute(w, TmplData{false, tableInfo, cols, rs, outs})
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
 }

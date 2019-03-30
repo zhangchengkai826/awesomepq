@@ -40,13 +40,18 @@
         <div class="cmdPane">
             <form method="POST">
                 <label>Command: </label><br />
-                <textarea name="cmd" rows="6" cols="100" wrap="hard"></textarea><br />
-                <input type="submit" value="Run!">
+                <textarea name="cmd" rows="6" cols="100" wrap="hard">{{.Cmd}}</textarea><br />
+                <input name="query" type="submit" value="Query!">
+                <input name="exec" type="submit" value="Exec!">
             </form>
         </div>
         <div class="outputPane">
             <label>Output: </label><br />
             <textarea name="output" rows="6" cols="100" style="white-space: nowrap;">{{range .Outputs}}{{.}}&#13;&#10;{{end}}</textarea>
+        </div>
+        <div class="historyPane">
+            <label>Output: </label><br />
+            <textarea name="history" rows="6" cols="100" style="white-space: nowrap;">{{range .History}}{{.}}&#13;&#10;&#13;&#10;{{end}}</textarea>
         </div>
     </div>
 {{end}}

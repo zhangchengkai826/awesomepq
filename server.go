@@ -16,6 +16,8 @@ type TmplData struct {
 	Cols []ColInfo
 	Rows []Row
 	Outputs []interface{}
+	Cmd string
+	History []interface{}
 }
 
 type TableInfo struct {
@@ -49,6 +51,8 @@ func main() {
 }
 
 var dbname string
+var cmd string
+var hist []interface{}
 
 func mainHandler(w http.ResponseWriter, r *http.Request) {
 	tmplForm := template.Must(template.ParseFiles("index.html"))
@@ -60,7 +64,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 
 	if dbname == "" && r.Method != http.MethodPost {
 		// 1. Not log in
-		err := tmplForm.Execute(w, TmplData{true, tableInfo, cols, rs, outs})
+		err := tmplForm.Execute(w, TmplData{true, tableInfo, cols, rs, outs, cmd, hist})
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -83,12 +87,16 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	// @First deal with user command
 	if r.Method == http.MethodPost && r.FormValue("cmd") != "" {
-		cmd := r.FormValue("cmd")
-		_, err = db.Exec(cmd)
-		if err != nil {
-			outs = append(outs, err)
+		cmd = r.FormValue("cmd")
+		if r.FormValue("exec") != "" {
+			// @Deal with user command (exec)
+			_, err = db.Exec(cmd)
+			if err != nil {
+				outs = append(outs, err)
+			}
+			hist = append(hist, cmd)
+			cmd = ""
 		}
 	}
 
@@ -110,8 +118,56 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	// 2.1 Already choose a table.
-	if tbname, ok := mux.Vars(r)["tbname"]; ok {
+	customQuery := false
+	if r.Method == http.MethodPost && r.FormValue("cmd") != "" {
+		cmd = r.FormValue("cmd")
+		if r.FormValue("query") != "" {
+			// @Deal with user command (query)
+			rows, err = db.Query(cmd)
+			if err != nil {
+				outs = append(outs, err)
+				goto QueryErrHandler
+			}
+			defer rows.Close()
+			colNames, err := rows.Columns()
+			if err != nil {
+				outs = append(outs, err)
+				goto QueryErrHandler
+			}
+			colTypes, err := rows.ColumnTypes()
+			if err != nil {
+				outs = append(outs, err)
+				goto QueryErrHandler
+			}
+			for i, _ := range colNames {
+				cols = append(cols, ColInfo{colNames[i], colTypes[i].DatabaseTypeName()})
+			}
+			for rows.Next() {
+				cellsRaw := make([]interface{}, len(cols))
+				cells := make([]Cell, len(cols))
+				for i := range cellsRaw {
+					cellsRaw[i] = &cells[i].Data
+				}
+				err := rows.Scan(cellsRaw...)
+				if err != nil {
+					outs = append(outs, err)
+					goto QueryErrHandler
+				}
+				rs = append(rs, Row{cells})
+			}
+			err = rows.Err()
+			if err != nil {
+				outs = append(outs, err)
+				goto QueryErrHandler
+			}
+			customQuery = true
+			hist = append(hist, cmd)
+			cmd = ""
+		}
+	}
+QueryErrHandler:
+	if tbname, ok := mux.Vars(r)["tbname"]; ok && !customQuery {
+		// @Show a complete table
 		// retrieve cols
 		var (
 			colName string
@@ -157,7 +213,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = tmplForm.Execute(w, TmplData{false, tableInfo, cols, rs, outs})
+	err = tmplForm.Execute(w, TmplData{false, tableInfo, cols, rs, outs, cmd, hist})
 	if err != nil {
 		log.Fatal(err)
 	}

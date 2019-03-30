@@ -51,6 +51,10 @@ func main() {
 }
 
 var dbname string
+var user string
+var pw string
+var host string
+var port string
 var cmd string
 var hist []interface{}
 
@@ -74,8 +78,12 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	// 2. Already log in.
 	if dbname == "" {
 		dbname = r.FormValue("dbname")
+		user = r.FormValue("user")
+		pw = r.FormValue("pw")
+		host = r.FormValue("host")
+		port = r.FormValue("port")
 	}
-	connStr := fmt.Sprintf("dbname=%s user=andys sslmode=disable", dbname)
+	connStr := fmt.Sprintf("dbname=%s user=%s password=%s host=%s port=%s sslmode=disable", dbname, user, pw, host, port)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
@@ -94,12 +102,13 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 			_, err = db.Exec(cmd)
 			if err != nil {
 				outs = append(outs, err)
+				goto ExecErrHander
 			}
 			hist = append(hist, cmd)
 			cmd = ""
 		}
 	}
-
+ExecErrHander:
 	var name string
 	rows, err := db.Query("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'")
 	if err != nil {
@@ -169,32 +178,22 @@ QueryErrHandler:
 	if tbname, ok := mux.Vars(r)["tbname"]; ok && !customQuery {
 		// @Show a complete table
 		// retrieve cols
-		var (
-			colName string
-			colType string
-		)
-		rows, err := db.Query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1", tbname)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer rows.Close()
-		for rows.Next() {
-			err := rows.Scan(&colName, &colType)
-			if err != nil {
-				log.Fatal(err)
-			}
-			cols = append(cols, ColInfo{colName, colType})
-		}
-		err = rows.Err()
-		if err != nil {
-			log.Fatal()
-		}
-
 		rows, err = db.Query(fmt.Sprintf("SELECT * FROM %s", tbname))
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer rows.Close()
+		colNames, err := rows.Columns()
+		if err != nil {
+			log.Fatal(err)
+		}
+		colTypes, err := rows.ColumnTypes()
+		if err != nil {
+			log.Fatal(err)
+		}
+		for i, _ := range colNames {
+			cols = append(cols, ColInfo{colNames[i], colTypes[i].DatabaseTypeName()})
+		}
 		for rows.Next() {
 			cellsRaw := make([]interface{}, len(cols))
 			cells := make([]Cell, len(cols))

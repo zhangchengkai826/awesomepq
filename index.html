@@ -105,7 +105,7 @@ COPY sc (sno, cno, grade) FROM 'C:\Users\andys\Desktop\sc.csv' DELIMITER E'\t' C
 
 ALTER TABLE student ADD COLUMN sclass varchar(20);
 ALTER TABLE student DROP COLUMN sclass;
-ALTER TABLE student ALTER COLUMN sname TYPE varchar(8);
+ALTER TABLE sc ALTER COLUMN grade TYPE real;
 
 UPDATE student
  SET sname = '李咏'

@@ -5,6 +5,7 @@
     <title>AwesomePQ</title>
     <link rel="stylesheet" href="/static/base.css" />
     <link href="https://fonts.googleapis.com/css?family=Cinzel|Gloria+Hallelujah|Special+Elite" rel="stylesheet">
+    <script type="text/javascript" src="/static/util.js"></script>
 <body>
 
 {{if .NeedLogIn}}
@@ -50,91 +51,46 @@
                 </tr>
             {{end}}
         </table>
+        <div class="genPane">
+            <form method="POST">
+                <label>Templates: </label><br /><br />
+                <div>
+                    <select id="cmd category selector" onchange="prepareInputs()">
+                        <option value="--">--</option>
+                        <option value="CREATE TABLE">CREATE TABLE</option>
+                        <option value="DROP TABLE">DROP TABLE</option>
+                        <option value="UPDATE">UPDATE</option>
+                        <option value="INSERT">INSERT</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="ADD COLUMN">ADD COLUMN</option>
+                        <option value="ALTER COLUMN">ALTER COLUMN</option>
+                        <option value="DROP COLUMN">DROP COLUMN</option>
+                    </select>
+                </div>
+                <div id="var options">
+                </div>
+                <br />
+                <div>
+                    <input name="gen" type="submit" value="Generate!">
+                </div>
+            </form>
+        </div>
+        <br />
         <div class="cmdPane">
             <form method="POST">
                 <label>Command: </label><br />
                 <textarea name="cmd" rows="6" cols="100" wrap="hard">{{.Cmd}}</textarea><br />
+                <br />
                 <input name="query" type="submit" value="Query!">
                 <input name="exec" type="submit" value="Exec!">
             </form>
         </div>
-        <div class="templatePane">
-            <label>Templates: </label><br />
-            <textarea style="background-color: lightgray" name="templates" rows="6" cols="100" style="white-space: nowrap;">CREATE TABLE student (
- sno varchar(64) PRIMARY KEY, --学生学号
- sname varchar(32) NOT NULL, --学生姓名
- ssex varchar(8), --学生性别
- sage int, --学生年龄
- sdept varchar(64) --学生所在院系
-);
-CREATE TABLE course (
- cno varchar(64) PRIMARY KEY, --课程编号
- cname varchar(64) NOT NULL, --课程名称
- cpno varchar(64), --先行课
- ccredit int --学分
-);
-CREATE TABLE sc (
- sno varchar(64), --学生学号
- cno varchar(64), --课程编号
- grade int, --成绩
- PRIMARY KEY(sno, cno)
-);
-CREATE TABLE teachers (
- tno varchar(64) PRIMARY KEY, --教师号
- tname varchar(32) NOT NULL, --姓名
- tsex varchar(8) DEFAULT '男', --性别
- birthday date, --出生日期
- dept varchar(64), --所在部门
- sid varchar(64) --身份证号
-);
-CREATE TABLE lessons (
- cno varchar(64) PRIMARY KEY, --课程号
- cname varchar(64) NOT NULL, --课程名
- credit smallint, --学分
- property varchar(64) --课程性质
-);
-CREATE TABLE shouke (
- tno varchar(64) PRIMARY KEY REFERENCES teachers(tno), --教师号
- cno varchar(64) REFERENCES lessons(cno), --课程号
- hours int --课时
-);
-
-COPY student FROM 'C:\Users\andys\Desktop\student.csv' (DELIMITER(E'\t'));
-COPY course FROM 'C:\Users\andys\Desktop\course.csv' (DELIMITER(E'\t'));
-COPY sc (sno, cno, grade) FROM 'C:\Users\andys\Desktop\sc.csv' DELIMITER E'\t' CSV NULL AS 'null';
-
-ALTER TABLE student ADD COLUMN sclass varchar(20);
-ALTER TABLE student DROP COLUMN sclass;
-ALTER TABLE sc ALTER COLUMN grade TYPE real;
-
-UPDATE student
- SET sname = '李咏'
- WHERE sname = '李勇';
-UPDATE course
- SET ccredit = 3
- WHERE cname = '数据处理';
-UPDATE sc
- SET grade = grade + 5
- WHERE cno = '1';
-UPDATE sc
- SET grade = grade + 5
- WHERE cno = (SELECT cno FROM course WHERE cname = '大学英语');
-UPDATE student
- SET sname = '王丹丹',
-     ssex = '女',
-     sage = 20,
-     sdept = 'MA'
- WHERE sno = '200515010';
-
-DELETE FROM student WHERE sdept = '';
-DELETE FROM student
- WHERE sage > 23 AND ssex = '男';
-DELETE FROM course WHERE ccredit < 2;</textarea>
-        </div>
+        <br />
         <div class="historyPane">
             <label>History: </label><br />
             <textarea style="background-color: lightgreen" name="history" rows="6" cols="100" style="white-space: nowrap;">{{range .History}}{{.}}&#13;&#10;&#13;&#10;{{end}}</textarea>
         </div>
+        <br />
         <div class="outputPane">
             <label>Error Log: </label><br />
             <textarea style="background-color: pink" name="output" rows="6" cols="100" style="white-space: nowrap;">{{range .Outputs}}{{.}}&#13;&#10;{{end}}</textarea>

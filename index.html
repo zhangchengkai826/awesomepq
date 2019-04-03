@@ -51,31 +51,6 @@
                 </tr>
             {{end}}
         </table>
-        <div class="genPane">
-            <form method="POST">
-                <label>Templates: </label><br /><br />
-                <div>
-                    <select id="cmd category selector" onchange="prepareInputs()">
-                        <option value="--">--</option>
-                        <option value="CREATE TABLE">CREATE TABLE</option>
-                        <option value="DROP TABLE">DROP TABLE</option>
-                        <option value="UPDATE">UPDATE</option>
-                        <option value="INSERT">INSERT</option>
-                        <option value="DELETE">DELETE</option>
-                        <option value="ADD COLUMN">ADD COLUMN</option>
-                        <option value="ALTER COLUMN">ALTER COLUMN</option>
-                        <option value="DROP COLUMN">DROP COLUMN</option>
-                    </select>
-                </div>
-                <div id="var options">
-                </div>
-                <br />
-                <div>
-                    <input name="gen" type="submit" value="Generate!">
-                </div>
-            </form>
-        </div>
-        <br />
         <div class="cmdPane">
             <form method="POST">
                 <label>Command: </label><br />

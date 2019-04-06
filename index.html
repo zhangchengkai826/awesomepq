@@ -38,7 +38,7 @@
     <div class="dataPane", style="overflow-y:scroll;">
         <h2>Data Pane</h2>
         <table>
-            <tr>
+            <tr id="trColInfo">
                 {{range .Cols}}
                     <th>{{.Name}}<br />{{.Type}}</th>
                 {{end}}
@@ -46,7 +46,7 @@
             {{range .Rows}}
                 <tr>
                     {{range .Cells}}
-                        <td>{{.Data}}</td>
+                        <td ondblclick="update(this)">{{.Data}}</td>
                     {{end}}
                 </tr>
             {{end}}

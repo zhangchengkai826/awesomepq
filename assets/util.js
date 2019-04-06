@@ -64,7 +64,10 @@ function update(e) {
 
 /* e input element */
 function showInsertRow(e) {
+    e.setAttribute("value", "OK");
+    e.setAttribute("onclick", "insert(this)");
     let tr = document.createElement("TR");
+    tr.setAttribute("id", "insertPlaceHolder");
     let trColInfos = document.getElementById("trColInfo");
     for(let i = 0; i < trColInfos.children.length; i++) {
         let inputBox = document.createElement("INPUT");
@@ -76,4 +79,18 @@ function showInsertRow(e) {
     }
     let datatbl = document.getElementById("datatbl");
     datatbl.appendChild(tr);
+}
+
+function insert(e) {
+    alert("INSERT");
+    let insertPlaceHolder = document.getElementById("insertPlaceHolder");
+
+
+
+    insertPlaceHolder.parentElement.removeChild(insertPlaceHolder);
+    let insertBtn = document.getElementById("insertBtn");
+    insertBtn.setAttribute(
+        "value", "Insert");
+    insertBtn.setAttribute(
+        "onclick", "showInsertRow(this)");
 }

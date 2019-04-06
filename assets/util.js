@@ -21,6 +21,10 @@ function update(e) {
             case "Enter":
                 let inputBox = event.srcElement;
                 let newValue = inputBox.value;
+                if (newValue === "")
+                    newValue = "NULL";
+                else
+                    newValue = "\'" + newValue + "\'";
 
                 let trNode = inputBox.parentElement.parentElement;
                 let colId = Array.prototype.indexOf.call(trNode.children, inputBox.parentNode);
@@ -34,13 +38,19 @@ function update(e) {
                     colNames.push(th.innerHTML.split('<br>')[0]);
 
                 let whereClause = "";
-                for (let i = 0; i < colVals.length; i++)
-                    whereClause += colNames[i] + "=\'" + colVals[i] + "\' AND ";
+                for (let i = 0; i < colVals.length; i++) {
+                    let val;
+                    if(colVals[i] === "")
+                        val = " IS NULL";
+                    else
+                        val = "=\'" + colVals[i] + "\'";
+                    whereClause += colNames[i] + val + " AND ";
+                }
                 whereClause = whereClause.slice(0, -5);
 
                 let tbName = window.location.href.split("/").reverse()[0];
 
-                let sql = "UPDATE " + tbName + " SET " + colNames[colId] + "=\'" + newValue + "\' WHERE "
+                let sql = "UPDATE " + tbName + " SET " + colNames[colId] + "=" + newValue + " WHERE "
                     + whereClause + ";";
 
                 post({"cmd": sql, "exec": true});

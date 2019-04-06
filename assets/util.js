@@ -17,6 +17,14 @@ function getTblName() {
     return window.location.href.split("/").reverse()[0];
 }
 
+function getColNames() {
+    let trColInfos = document.getElementById("trColInfo");
+    let colNames = [];
+    for(let i = 0; i < trColInfos.children.length-1; i++)
+        colNames.push(trColInfos.children[i].innerHTML.split('<br>')[0]);
+    return colNames;
+}
+
 /* e: td element */
 function update(e) {
     let inputBox = document.createElement("INPUT");
@@ -33,13 +41,10 @@ function update(e) {
                 let trNode = inputBox.parentElement.parentElement;
                 let colId = Array.prototype.indexOf.call(trNode.children, inputBox.parentNode);
                 let colVals = [];
-                for (let td of trNode.children)
-                    colVals.push(td.innerText);
+                for (let i = 0; i < trNode.children.length-1; i++)
+                    colVals.push(trNode.children[i].innerText);
 
-                let trColInfos = document.getElementById("trColInfo");
-                let colNames = [];
-                for (let th of trColInfos.children)
-                    colNames.push(th.innerHTML.split('<br>')[0]);
+                let colNames = getColNames();
 
                 let whereClause = "";
                 for (let i = 0; i < colVals.length; i++) {
@@ -71,7 +76,7 @@ function showInsertRow(e) {
     let tr = document.createElement("TR");
     tr.setAttribute("id", "insertPlaceHolder");
     let trColInfos = document.getElementById("trColInfo");
-    for(let i = 0; i < trColInfos.children.length; i++) {
+    for(let i = 0; i < trColInfos.children.length-1; i++) {
         let inputBox = document.createElement("INPUT");
         inputBox.setAttribute("style",
             "width:" + trColInfos.children[i].offsetWidth * 0.8 + "px;");
@@ -87,8 +92,8 @@ function insert(e) {
     let insertPlaceHolder = document.getElementById("insertPlaceHolder");
 
     let insertVals = [];
-    for(let td of insertPlaceHolder.children)
-        insertVals.push(td.children[0].value);
+    for(let i = 0; i < insertPlaceHolder.children.length; i++)
+        insertVals.push(insertPlaceHolder.children[i].children[0].value);
     let sql = "INSERT INTO " + getTblName() + " VALUES (";
     for(let val of insertVals) {
         if(val === "")
@@ -107,4 +112,31 @@ function insert(e) {
         "value", "Insert");
     insertBtn.setAttribute(
         "onclick", "showInsertRow(this)");
+}
+
+function del(e) {
+    let tr = e.parentElement.parentElement;
+    let curRowVals = [];
+    for(let i = 0; i < tr.children.length-1; i++)
+        curRowVals.push(tr.children[i].innerHTML);
+
+    let colNames = getColNames();
+
+    let sql = "DELETE FROM " + getTblName() + " WHERE ";
+    for(let i = 0; i < colNames.length; i++) {
+        sql += colNames[i];
+        if(curRowVals[i] === "")
+            sql += " IS NULL";
+        else
+            sql += "=\'" + curRowVals[i] + "\'";
+        sql += " AND ";
+    }
+    sql = sql.slice(0, -5);
+    sql += ";";
+
+    post({"cmd": sql, "exec": true});
+}
+
+function addCol(e) {
+
 }

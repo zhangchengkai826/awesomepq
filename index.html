@@ -42,12 +42,14 @@
                 {{range .Cols}}
                     <th>{{.Name}}<br />{{.Type}}</th>
                 {{end}}
+                <th><input type="button" onclick="addCol(this)" value="+" /></th>
             </tr>
             {{range .Rows}}
                 <tr>
                     {{range .Cells}}
                         <td ondblclick="update(this)">{{.Data}}</td>
                     {{end}}
+                    <td><input type="button" onclick="del(this)" value="x" /></td>
                 </tr>
             {{end}}
         </table>

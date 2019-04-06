@@ -37,7 +37,7 @@
     </div>
     <div class="dataPane", style="overflow-y:scroll;">
         <h2>Data Pane</h2>
-        <table>
+        <table id="datatbl">
             <tr id="trColInfo">
                 {{range .Cols}}
                     <th>{{.Name}}<br />{{.Type}}</th>
@@ -51,6 +51,7 @@
                 </tr>
             {{end}}
         </table>
+        <input type="button" value="Insert" onclick="showInsertRow()" />
         <div class="cmdPane">
             <form method="POST">
                 <label>Command: </label><br />

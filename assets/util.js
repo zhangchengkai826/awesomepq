@@ -61,3 +61,19 @@ function update(e) {
     };
     e.appendChild(inputBox)
 }
+
+/* e input element */
+function showInsertRow(e) {
+    let tr = document.createElement("TR");
+    let trColInfos = document.getElementById("trColInfo");
+    for(let i = 0; i < trColInfos.children.length; i++) {
+        let inputBox = document.createElement("INPUT");
+        inputBox.setAttribute("style",
+            "width:" + trColInfos.children[i].offsetWidth * 0.8 + "px;");
+        let td = document.createElement("TD");
+        td.appendChild(inputBox);
+        tr.appendChild(td);
+    }
+    let datatbl = document.getElementById("datatbl");
+    datatbl.appendChild(tr);
+}

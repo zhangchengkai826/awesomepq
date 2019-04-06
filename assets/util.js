@@ -13,6 +13,10 @@ function post(params) {
     form.submit();
 }
 
+function getTblName() {
+    return window.location.href.split("/").reverse()[0];
+}
+
 /* e: td element */
 function update(e) {
     let inputBox = document.createElement("INPUT");
@@ -48,9 +52,7 @@ function update(e) {
                 }
                 whereClause = whereClause.slice(0, -5);
 
-                let tbName = window.location.href.split("/").reverse()[0];
-
-                let sql = "UPDATE " + tbName + " SET " + colNames[colId] + "=" + newValue + " WHERE "
+                let sql = "UPDATE " + getTblName() + " SET " + colNames[colId] + "=" + newValue + " WHERE "
                     + whereClause + ";";
 
                 post({"cmd": sql, "exec": true});
@@ -82,10 +84,22 @@ function showInsertRow(e) {
 }
 
 function insert(e) {
-    alert("INSERT");
     let insertPlaceHolder = document.getElementById("insertPlaceHolder");
 
+    let insertVals = [];
+    for(let td of insertPlaceHolder.children)
+        insertVals.push(td.children[0].value);
+    let sql = "INSERT INTO " + getTblName() + " VALUES (";
+    for(let val of insertVals) {
+        if(val === "")
+            sql += "NULL,";
+        else
+            sql += "\'" + val + "\',";
+    }
+    sql = sql.slice(0, -1);
+    sql += ");";
 
+    post({"cmd": sql, "exec": true});
 
     insertPlaceHolder.parentElement.removeChild(insertPlaceHolder);
     let insertBtn = document.getElementById("insertBtn");

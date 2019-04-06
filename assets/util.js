@@ -137,6 +137,45 @@ function del(e) {
     post({"cmd": sql, "exec": true});
 }
 
-function addCol(e) {
+function showAddColInputs(e) {
+    let th = e.parentElement;
+    th.removeChild(e);
 
+    let nameInput = document.createElement("INPUT");
+    nameInput.setAttribute("id", "newColName");
+    nameInput.setAttribute("value", "(new column name)");
+    th.appendChild(nameInput);
+
+    th.appendChild(document.createElement("BR"));
+
+    let typeInput = document.createElement("INPUT");
+    typeInput.setAttribute("id", "newColType");
+    typeInput.setAttribute("value", "(new column type)");
+    th.appendChild(typeInput);
+
+    th.appendChild(document.createElement("BR"));
+
+    let btOk = document.createElement("INPUT");
+    btOk.setAttribute("type", "button");
+    btOk.setAttribute("onclick", "addCol(this)");
+    btOk.setAttribute("value", "Add");
+    th.appendChild(btOk);
+}
+
+function addCol(e) {
+    let newColName = document.getElementById("newColName").value;
+    let newColType = document.getElementById("newColType").value;
+    let sql = "ALTER TABLE " + getTblName() +
+        " ADD COLUMN " + newColName + " " + newColType + ";";
+
+    post({"cmd": sql, "exec": true});
+
+    let th = e.parentElement;
+    while(th.firstChild) 
+        th.removeChild(th.firstChild);
+    let btPlus = document.createElement("INPUT");
+    btPlus.setAttribute("type", "button");
+    btPlus.setAttribute("onclick", "showAddColInputs(this)");
+    btPlus.setAttribute("value", "+");
+    th.appendChild(btPlus);
 }

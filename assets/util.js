@@ -156,6 +156,7 @@ function showAddColInputs(e) {
     th.appendChild(document.createElement("BR"));
 
     let btOk = document.createElement("INPUT");
+    btOk.setAttribute("class", "uibtn");
     btOk.setAttribute("type", "button");
     btOk.setAttribute("onclick", "addCol(this)");
     btOk.setAttribute("value", "Add");
@@ -174,6 +175,7 @@ function addCol(e) {
     while(th.firstChild) 
         th.removeChild(th.firstChild);
     let btPlus = document.createElement("INPUT");
+    btPlus.setAttribute("class", "uibtn");
     btPlus.setAttribute("type", "button");
     btPlus.setAttribute("onclick", "showAddColInputs(this)");
     btPlus.setAttribute("value", "+");
@@ -201,6 +203,7 @@ function showAlterColInputs(e) {
     div.appendChild(document.createElement("BR"));
 
     let btOk = document.createElement("INPUT");
+    btOk.setAttribute("class", "uibtn");
     btOk.setAttribute("type", "button");
     btOk.setAttribute("onclick", "alterCol(this)");
     btOk.setAttribute("value", "Ok");
@@ -229,12 +232,14 @@ function alterCol(e) {
         div.removeChild(div.firstChild);
 
     let alterBtn = document.createElement("INPUT");
+    alterBtn.setAttribute("class", "uibtn");
     alterBtn.setAttribute("type", "button");
     alterBtn.setAttribute("onclick", "showAlterColInputs(this)");
     alterBtn.setAttribute("value", "Alter");
     div.appendChild(alterBtn);
 
     let xBtn = document.createElement("INPUT");
+    xBtn.setAttribute("class", "uibtn");
     xBtn.setAttribute("type", "button");
     xBtn.setAttribute("onclick", "delCol(this)");
     xBtn.setAttribute("value", "x");
@@ -242,7 +247,7 @@ function alterCol(e) {
 }
 
 function delCol(e) {
-    let th = e.parentElement;
+    let th = e.parentElement.parentElement;
     let colName = th.innerHTML.split("<br>")[0];
     let sql = "ALTER TABLE " + getTblName() + " DROP COLUMN " + colName + ";";
 

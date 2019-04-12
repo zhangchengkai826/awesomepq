@@ -40,20 +40,21 @@
         <table id="datatbl">
             <tr id="trColInfo">
                 {{range .Cols}}
-                    <th>{{.Name}}<br />{{.Type}}<br /><div><input type="button" onclick="showAlterColInputs(this)" value="Alter" /><input type="button" onclick="delCol(this)" value="x" /></div></th>
+                    <th>{{.Name}}<br />{{.Type}}<br /><div><input class="uibtn" type="button" onclick="showAlterColInputs(this)" value="Alter" /><input class="uibtn" type="button" onclick="delCol(this)" value="x" /></div></th>
                 {{end}}
-                <th><input type="button" onclick="showAddColInputs(this)" value="+" /></th>
+                <th>add<br />COLUMN<br /><input class="uibtn" type="button" onclick="showAddColInputs(this)" value="+" /></th>
             </tr>
             {{range .Rows}}
                 <tr>
                     {{range .Cells}}
                         <td ondblclick="update(this)">{{.Data}}</td>
                     {{end}}
-                    <td><input type="button" onclick="del(this)" value="x" /></td>
+                    <td><input class="uibtn" type="button" onclick="del(this)" value="x" /></td>
                 </tr>
             {{end}}
         </table>
-        <input id="insertBtn" type="button" value="Insert" onclick="showInsertRow(this)" />
+        <br />
+        <input class="uibtn" id="insertBtn" type="button" value="Insert" onclick="showInsertRow(this)" />
         <div class="cmdPane">
             <form method="POST">
                 <label>Command: </label><br />

@@ -179,3 +179,72 @@ function addCol(e) {
     btPlus.setAttribute("value", "+");
     th.appendChild(btPlus);
 }
+
+function showAlterColInputs(e) {
+    let th = e.parentElement.parentElement;
+    let div = e.parentElement;
+    while(div.firstChild)
+        div.removeChild(div.firstChild);
+
+    let nameInput = document.createElement("INPUT");
+    nameInput.setAttribute("id", "alteredColName");
+    nameInput.setAttribute("value", "(new column name)");
+    div.appendChild(nameInput);
+
+    div.appendChild(document.createElement("BR"));
+
+    let typeInput = document.createElement("INPUT");
+    typeInput.setAttribute("id", "alteredColType");
+    typeInput.setAttribute("value", "(new column type)");
+    div.appendChild(typeInput);
+
+    div.appendChild(document.createElement("BR"));
+
+    let btOk = document.createElement("INPUT");
+    btOk.setAttribute("type", "button");
+    btOk.setAttribute("onclick", "alterCol(this)");
+    btOk.setAttribute("value", "Ok");
+    div.appendChild(btOk);
+}
+
+function alterCol(e) {
+    let th = e.parentElement.parentElement;
+    let colName = th.innerHTML.split("<br>")[0];
+    let newColName = document.getElementById("alteredColName").value;
+    let newColType = document.getElementById("alteredColType").value;
+    let sql = "";
+    if (newColName !== "(new column name)" && newColName !== "")
+        sql += "ALTER TABLE " + getTblName() +
+            " RENAME COLUMN " + colName + " TO " + newColName + ";";
+    else
+        newColName = colName;
+    if (newColType !== "(new column type)" && newColType !== "")
+        sql += "ALTER TABLE " + getTblName() +
+            " ALTER COLUMN " + newColName + " TYPE " + newColType + ";";
+
+    post({"cmd": sql, "exec": true});
+
+    let div = e.parentElement;
+    while(div.firstChild)
+        div.removeChild(div.firstChild);
+
+    let alterBtn = document.createElement("INPUT");
+    alterBtn.setAttribute("type", "button");
+    alterBtn.setAttribute("onclick", "showAlterColInputs(this)");
+    alterBtn.setAttribute("value", "Alter");
+    div.appendChild(alterBtn);
+
+    let xBtn = document.createElement("INPUT");
+    xBtn.setAttribute("type", "button");
+    xBtn.setAttribute("onclick", "delCol(this)");
+    xBtn.setAttribute("value", "x");
+    div.appendChild(xBtn);
+}
+
+function delCol(e) {
+    let th = e.parentElement;
+    let colName = th.innerHTML.split("<br>")[0];
+    let sql = "ALTER TABLE " + getTblName() + " DROP COLUMN " + colName + ";";
+
+    post({"cmd": sql, "exec": true});
+}

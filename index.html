@@ -40,7 +40,7 @@
         <table id="datatbl">
             <tr id="trColInfo">
                 {{range .Cols}}
-                    <th>{{.Name}}<br />{{.Type}}</th>
+                    <th>{{.Name}}<br />{{.Type}}<br /><div><input type="button" onclick="showAlterColInputs(this)" value="Alter" /><input type="button" onclick="delCol(this)" value="x" /></div></th>
                 {{end}}
                 <th><input type="button" onclick="showAddColInputs(this)" value="+" /></th>
             </tr>
